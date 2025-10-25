@@ -15,7 +15,7 @@ def get_preprocessor(num_features, cat_features):
         ("num", Pipeline([("impute", SimpleImputer(strategy="median")),
                           ("scale", StandardScaler())]), num_features),
         ("cat", Pipeline([("impute", SimpleImputer(strategy="most_frequent")),
-                          ("ohe", OneHotEncoder(handle_unknown='ignore'))]), cat_features)
+                          ("ohe", OneHotEncoder(handle_unknown='ignore', sparse_output=False))]), cat_features)
     ])
 
 def run_model(model, X_train, y_train, X_val, y_val, preprocessor, name, degree=None):

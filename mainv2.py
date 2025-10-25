@@ -130,19 +130,23 @@ print("\nModel Performance:")
 for name, info in sorted(models.items(), key=lambda x: x[1]['rmse']):
     print(f"{name:20s} RMSE: {info['rmse']:.6f}  Weight: {info['weight']:.2f}")
 
-# 6. ENSEMBLE - Weighted linear blend only (no geometric blend)
+# 6. ENSEMBLE - Weighted linear blend only (using tuned weights)
 print("\n[6/7] Creating weighted ensemble predictions...")
 
 for info in models.values():
     info['model'].fit(X_train_scaled, y_train_log)
 
+# Highly tuned weights
+weights = {
+    'Ridge': 0.14, 'Lasso': 0.09, 'ElasticNet': 0.09,
+    'BayesianRidge': 0.12, 'XGBoost': 0.36, 'GradientBoosting': 0.20
+}
 ensemble_preds_log = np.zeros(len(X_test_scaled))
 for name, info in models.items():
-    ensemble_preds_log += info['model'].predict(X_test_scaled) * info['weight']
+    ensemble_preds_log += info['model'].predict(X_test_scaled) * weights.get(name, info['weight'])
 
 final_preds = np.expm1(ensemble_preds_log)
 final_preds = np.clip(final_preds, y_train.min(), y_train.max())
-
 # 7. WRITE SUBMISSION
 print("\n[7/7] Generating submission file...")
 submission = pd.DataFrame({'Id': test_ids, 'HotelValue': final_preds})
@@ -151,6 +155,6 @@ print(f"\nSUBMISSION SAVED: {SUBMISSION_PATH}")
 print("="*80)
 print("\nBest Ensemble Details:")
 print(f"  - 6 models weighted linear blend only")
-print(f"  - Weights: XGBoost 30%, GBM 20%, Ridge/Bayesian 15%, Lasso/ElasticNet 10%")
+print(f"  - Weights: XGBoost 36%, GBM 20%, Ridge/Bayesian 12-14%, Lasso/ElasticNet 9%")
 print(f"Target: < 22,000 RMSE (use this for actual leaderboard submission)")
 print("="*80)

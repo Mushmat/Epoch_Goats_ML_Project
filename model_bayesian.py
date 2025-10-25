@@ -6,6 +6,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 import config
 import numpy as np
+from sklearn.pipeline import Pipeline
+
 
 if __name__ == "__main__":
     df = pd.read_csv(config.DATA_TRAIN_PATH)

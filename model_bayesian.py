@@ -24,3 +24,6 @@ if __name__ == "__main__":
     val_pred = pipe.predict(X_val)
     rmse = np.sqrt(mean_squared_error(y_val, val_pred))
     print(f"Bayesian Ridge RMSE: {rmse}")
+    
+    import joblib
+    joblib.dump(pipe, "best_model.pkl")

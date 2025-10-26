@@ -89,7 +89,5 @@ This project builds regression models to predict hotel property values using tab
 
 ---
 
-This README provides a complete guide to your project code, experiments, and results and will help evaluators and collaborators understand your work clearly.
-
 
 

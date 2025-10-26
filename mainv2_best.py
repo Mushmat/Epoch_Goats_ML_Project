@@ -44,8 +44,8 @@ test_df = advanced_feature_engineering(test_df)
 # 3. OUTLIER REMOVAL -- use 0.03/0.97 quantiles
 def remove_outliers_advanced(df, target_col='HotelValue'):
     before = len(df)
-    Q1 = df[target_col].quantile(0.01)
-    Q3 = df[target_col].quantile(0.99)
+    Q1 = df[target_col].quantile(0.03)
+    Q3 = df[target_col].quantile(0.97)
     IQR = Q3 - Q1
     lower = Q1 - 1.5 * IQR
     upper = Q3 + 1.5 * IQR
@@ -104,7 +104,7 @@ xgb_model.fit(X_tr, y_tr, eval_set=[(X_val, y_val)], verbose=False)
 models['XGBoost'] = {'model': xgb_model, 'rmse': np.sqrt(mean_squared_error(y_val, xgb_model.predict(X_val))), 'weight': 0.30}
 
 gb_model = GradientBoostingRegressor(
-    n_estimators=500, max_depth=4, learning_rate=0.03, subsample=0.8,
+    n_estimators=500, max_depth=4, learning_rate=0.05, subsample=0.8,
     min_samples_split=5, min_samples_leaf=2, random_state=SEED
 )
 gb_model.fit(X_tr, y_tr)
@@ -117,8 +117,8 @@ for name, info in sorted(models.items(), key=lambda x: x[1]['rmse']):
 # 6. ENSEMBLE - retrain models on ALL processed training data, then blend
 print("\n[6/7] Creating weighted ensemble with all training data...")
 weights = {
-    'Ridge': 0.13, 'Lasso': 0.12, 'ElasticNet': 0.12,
-    'BayesianRidge': 0.13, 'XGBoost': 0.19, 'GradientBoosting': 0.31
+    'Ridge': 0.16, 'Lasso': 0.115, 'ElasticNet': 0.095,
+    'BayesianRidge': 0.15, 'XGBoost': 0.21, 'GradientBoosting': 0.27
 }
 for info in models.values():
     info['model'].fit(X_train_scaled, y_train_log)
@@ -126,7 +126,7 @@ ensemble_preds_log = np.zeros(len(X_test_scaled))
 for name, info in models.items():
     ensemble_preds_log += info['model'].predict(X_test_scaled) * weights.get(name, info['weight'])
 final_preds = np.expm1(ensemble_preds_log)
-final_preds = np.clip(final_preds, y_train.min(), y_train.max() * 0.97)
+final_preds = np.clip(final_preds, y_train.min(), y_train.max())
 
 # 7. WRITE SUBMISSION
 print("\n[7/7] Generating submission file...")
